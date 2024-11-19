@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagina Cadastro</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/auth.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <script src="../js/logged.js"></script>
+</head>
+
+<body>
+    <div class="toast-container"></div>
+    <div class="container">
+        <div class="box">
+            <h2 class="title">Cadastro</h2>
+            <form action="post" id="registerForm">
+                <div class="mb">
+                    <label for="name">Digite seu nome</label>
+                    <input class="form-control" type="text" name="name" id="name" required>
+                </div>
+                <div class="mb">
+                    <label for="email">Digite seu email</label>
+                    <input class="form-control" type="email" name="email" id="email" required>
+                </div>
+                <div class="mb">
+                    <label for="password">Digite sua senha</label>
+                    <input class="form-control" type="password" name="password" id="password" required>
+                </div>
+                <div class="mb">
+                    <label for="anime_preference">Animes preferidos</label>
+                    <select name="anime_preference" class="form-control" id="anime_preference" multiple></select>
+                </div>
+                <div style="margin-top: 8px;">
+                    <button type="submit" class="btn">Criar conta</button>
+                </div>
+                <p>Já possui conta? <a href="/pages/login.html">Entre na sua conta agora</a></p>
+            </form>
+        </div>
+    </div>
+    <script>
+        function showToast(message, type = 'success') {
+            const container = document.querySelector('.toast-container');
+            const toast = document.createElement('div');
+            toast.classList.add('toast', type);
+            toast.textContent = message;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        const form = document.getElementById("registerForm");
+
+        form.addEventListener('submit', async (e) => {
+            const api_url = 'https://projetoweb-api.vercel.app';
+
+            e.preventDefault();
+
+            const formData = new FormData(form);
+
+            if (!formData.get('name') || !formData.get("email") || !formData.get("password")) {
+                alert("Os campos precisam ser preenchidos");
+                return;
+            } else if (formData.get("password").length < 8) {
+                showToast("A senha precisa conter no minimo 8 caracteres", 'warning');
+                return;
+            } else if (formData.get("name").length < 3) {
+                showToast("O nome precisa conter no minimo 8 caracteres", 'warning');
+                return;
+            }
+
+            const animePreferences = Array.from(
+                document.getElementById("anime_preference").selectedOptions
+            ).map(option => option.value);
+
+            if (animePreferences.length === 0) {
+                showToast("Selecione ao menos um anime preferido", 'warning');
+                return;
+            }
+
+            console.log(animePreferences)
+
+            formData.delete("anime_preference");
+            formData.append("anime_preference", animePreferences);
+
+            const formDataObject = {};
+            formData.forEach((value, key) => {
+                formDataObject[key] = value;
+            });
+
+            const response = await fetch(api_url + "/auth/register", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formDataObject)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+
+                showToast("Conta criada com sucesso!", 'success');
+
+                setTimeout(() => {
+                    window.location.href = "/pages/login.html";
+                }, 3000);
+            } else {
+                const error = await response.json();
+
+                showToast(error.message, 'success');
+            }
+        })
+    </script>
+
+    <script src="../js/requestAnimes.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagina Login</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/home.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <script src="../js/logged.js"></script>
+</head>
+
+<body>
+    <div class="toast-container"></div>
+    <div class="container">
+        <div class="box">
+            <h1 class="welcome">Seja Bem-Vindo, <span id="userName"></span>!</h1>
+            <p class="user-email">Seu e-mail é: <span id="userEmail"></span></p>
+            <h2 class="anime-title">Seus Animes Favoritos</h2>
+            <div id="sectionAnimes" class="anime-container"></div>
+            <button class="link-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <script>
+        function showToast(message, type = 'success') {
+            const container = document.querySelector('.toast-container');
+            const toast = document.createElement('div');
+            toast.classList.add('toast', type);
+            toast.textContent = message;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        const data = JSON.parse(localStorage.getItem('user'));
+
+        document.getElementById('userName').textContent = data.name || 'username'
+        document.getElementById('userEmail').textContent = data.email || 'example@example.com';
+
+        const sectionAnimes = document.getElementById('sectionAnimes');
+
+        data.animes.map(anime => {
+            const cover = new Image();
+            cover.src = anime.cover;
+            cover.alt = anime.title;
+
+            const title = document.createElement('p');
+            title.textContent = anime.title;
+
+            const animeCard = document.createElement('div');
+            animeCard.classList.add('anime-card');
+
+            animeCard.append(cover);
+            animeCard.append(title);
+
+            sectionAnimes.append(animeCard);
+        })
+
+
+        function logout() {
+            showToast('Você foi deslogado com sucesso.', 'success');
+            setTimeout(() => {
+                localStorage.removeItem('user');
+                window.location.href = "/pages/login.html";
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
